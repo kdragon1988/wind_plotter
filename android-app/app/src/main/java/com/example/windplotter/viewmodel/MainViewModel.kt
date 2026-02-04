@@ -64,6 +64,27 @@ class MainViewModel(
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
 
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val recentSamples: StateFlow<List<Sample>> = _currentMission.flatMapLatest { mission ->
+        if (mission != null) {
+            sampleDao.getRecentSamples(mission.missionId)
+        } else {
+            flowOf(emptyList())
+        }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    val unsyncedCount: StateFlow<Int> = sampleDao.getUnsyncedCount()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val missionSamples: StateFlow<List<Sample>> = _currentMission.flatMapLatest { mission ->
+        if (mission != null) {
+            sampleDao.getSamplesForMission(mission.missionId)
+        } else {
+            flowOf(emptyList())
+        }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
     init {
         checkActiveMission()
     }
