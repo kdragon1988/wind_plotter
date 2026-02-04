@@ -8,10 +8,12 @@ import androidx.lifecycle.viewModelScope
 import com.example.windplotter.DJIConnectionManager
 import com.example.windplotter.data.Mission
 import com.example.windplotter.data.MissionDao
+import com.example.windplotter.data.MissionStats
 import com.example.windplotter.data.Sample
 import com.example.windplotter.data.SampleDao
 import com.example.windplotter.services.DataCollectionService
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -128,6 +130,25 @@ class MainViewModel(
                 DataCollectionService.stop(getApplication())
             }
         }
+    }
+
+    // --- Mission History ---
+    val allMissions: StateFlow<List<Mission>> = missionDao.getAllMissions()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    fun deleteMission(mission: Mission) {
+        viewModelScope.launch {
+            missionDao.delete(mission)
+        }
+    }
+
+    // --- Statistics ---
+    fun getMissionStats(missionId: String): Flow<MissionStats?> {
+        return sampleDao.getMissionStats(missionId)
+    }
+
+    fun getMissionSamples(missionId: String): Flow<List<Sample>> {
+        return sampleDao.getSamplesForMission(missionId)
     }
 }
 

@@ -33,4 +33,16 @@ interface SampleDao {
 
     @Query("SELECT COUNT(*) FROM samples WHERE isSynced = 0")
     fun getUnsyncedCount(): Flow<Int>
+
+    @Query("""
+        SELECT 
+            MAX(windSpeed) as maxWindSpeed, 
+            AVG(windSpeed) as avgWindSpeed, 
+            AVG(altitude) as avgAltitude, 
+            MIN(timestamp) as startTime, 
+            MAX(timestamp) as endTime 
+        FROM samples 
+        WHERE missionId = :missionId
+    """)
+    fun getMissionStats(missionId: String): Flow<MissionStats?>
 }

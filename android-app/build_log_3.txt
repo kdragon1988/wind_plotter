@@ -1,0 +1,234 @@
+WARNING: A restricted method in java.lang.System has been called
+WARNING: java.lang.System::load has been called by net.rubygrapefruit.platform.internal.NativeLibraryLoader in an unnamed module (file:/Users/ryuya2/.gradle/wrapper/dists/gradle-8.4-bin/1w5dpkrfk8irigvoxmyhowfim/gradle-8.4/lib/native-platform-0.22-milestone-25.jar)
+WARNING: Use --enable-native-access=ALL-UNNAMED to avoid a warning for callers in this module
+WARNING: Restricted methods will be blocked in a future release unless native access is enabled
+
+> Task :app:checkKotlinGradlePluginConfigurationErrors
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:checkDebugAarMetadata UP-TO-DATE
+> Task :app:generateDebugResValues UP-TO-DATE
+> Task :app:mapDebugSourceSetPaths UP-TO-DATE
+> Task :app:generateDebugResources UP-TO-DATE
+> Task :app:mergeDebugResources UP-TO-DATE
+> Task :app:packageDebugResources UP-TO-DATE
+> Task :app:parseDebugLocalResources UP-TO-DATE
+> Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :app:extractDeepLinksDebug UP-TO-DATE
+
+> Task :app:processDebugMainManifest
+/Users/ryuya2/repos/wind_plotter/android-app/app/src/main/AndroidManifest.xml:36:9-41 Warning:
+	android:extractNativeLibs should not be specified in this source AndroidManifest.xml file. See https://d.android.com/guide/topics/manifest/application-element#extractNativeLibs for more information.
+The AGP Upgrade Assistant can remove the attribute from the AndroidManifest.xml file and update the build file accordingly. See https://d.android.com/studio/build/agp-upgrade-assistant for more information.
+/Users/ryuya2/repos/wind_plotter/android-app/app/src/main/AndroidManifest.xml:33:5-68:19 Warning:
+	application@android:allowBackup was tagged at AndroidManifest.xml:33 to replace other declarations but no other declaration present
+
+> Task :app:processDebugManifest
+> Task :app:processDebugManifestForPackage
+warn: removing resource com.example.windplotter:dimen/dialog_multi_rc_gimbal_source_change_width without required default value.
+warn: removing resource com.example.windplotter:string/flight_forbid_warn_alert_txt without required default value.
+warn: removing resource com.example.windplotter:string/flight_forbid_warn_edge_alert_txt without required default value.
+warn: removing resource com.example.windplotter:string/flight_frb_new_around_frb without required default value.
+warn: removing resource com.example.windplotter:string/flight_frb_new_around_limit without required default value.
+warn: removing resource com.example.windplotter:string/flight_frb_new_around_limit_height without required default value.
+warn: removing resource com.example.windplotter:string/flight_frb_new_around_to_open_license without required default value.
+warn: removing resource com.example.windplotter:string/flight_frb_new_around_to_unlock without required default value.
+warn: removing resource com.example.windplotter:string/flight_frb_new_below_limit_height without required default value.
+warn: removing resource com.example.windplotter:string/flight_frb_new_enhance_warning without required default value.
+warn: removing resource com.example.windplotter:string/flight_frb_new_in_auth_no_license without required default value.
+warn: removing resource com.example.windplotter:string/flight_frb_new_in_auth_with_license without required default value.
+warn: removing resource com.example.windplotter:string/flight_frb_new_limit_height_lose_gps without required default value.
+warn: removing resource com.example.windplotter:string/flight_frb_new_seem_in_auth_no_license without required default value.
+warn: removing resource com.example.windplotter:string/flight_frb_new_touch_to_open_license without required default value.
+warn: removing resource com.example.windplotter:string/flyfrb_map_click_pop_end_at without required default value.
+warn: removing resource com.example.windplotter:string/flyfrb_map_click_pop_in_auth_zone without required default value.
+warn: removing resource com.example.windplotter:string/flyfrb_map_click_pop_in_enhance_warning_zone without required default value.
+warn: removing resource com.example.windplotter:string/flyfrb_map_click_pop_in_height_zone without required default value.
+warn: removing resource com.example.windplotter:string/flyfrb_map_click_pop_in_limit_zone without required default value.
+warn: removing resource com.example.windplotter:string/flyfrb_map_click_pop_in_warning_zone without required default value.
+warn: removing resource com.example.windplotter:string/flyfrb_map_click_pop_start_at without required default value.
+warn: removing resource com.example.windplotter:string/flyfrb_map_click_pop_title without required default value.
+warn: removing resource com.example.windplotter:string/geo_zones without required default value.
+warn: removing resource com.example.windplotter:string/limit_tips_touch without required default value.
+warn: removing resource com.example.windplotter:string/limit_tips_touch_auth without required default value.
+warn: removing resource com.example.windplotter:string/limit_tips_touch_limit_height without required default value.
+warn: removing resource com.example.windplotter:string/limit_tips_touch_special_unlock without required default value.
+warn: removing resource com.example.windplotter:string/nfz_apply_description without required default value.
+warn: removing resource com.example.windplotter:string/nfz_fly_zone_class_e0 without required default value.
+warn: removing resource com.example.windplotter:string/nfz_fly_zone_parcels without required default value.
+warn: removing resource com.example.windplotter:string/nfz_fly_zone_power_plants without required default value.
+warn: removing resource com.example.windplotter:string/nfz_fly_zone_prisons without required default value.
+warn: removing resource com.example.windplotter:string/nfz_fly_zone_schools without required default value.
+warn: removing resource com.example.windplotter:string/nfz_fly_zone_stadiums without required default value.
+warn: removing resource com.example.windplotter:string/nfz_fly_zone_sua_prhobited without required default value.
+warn: removing resource com.example.windplotter:string/nfz_fly_zone_warning without required default value.
+warn: removing resource com.example.windplotter:string/nfz_http_request_area_cannot_unlock_error_prompt without required default value.
+warn: removing resource com.example.windplotter:string/nfz_http_request_error_common_prompt without required default value.
+warn: removing resource com.example.windplotter:string/nfz_http_request_token_error_prompt without required default value.
+warn: removing resource com.example.windplotter:string/nfz_http_request_too_more_license_error_prompt without required default value.
+warn: removing resource com.example.windplotter:string/nfz_http_request_too_more_unlock_error_prompt without required default value.
+warn: removing resource com.example.windplotter:string/nfz_http_request_verify_error_prompt without required default value.
+warn: removing resource com.example.windplotter:string/nfz_license_apply_qr_description without required default value.
+warn: removing resource com.example.windplotter:string/nfz_license_apply_title without required default value.
+warn: removing resource com.example.windplotter:string/nfz_map_title without required default value.
+warn: removing resource com.example.windplotter:string/nfz_server_error_account_format without required default value.
+warn: removing resource com.example.windplotter:string/nfz_server_error_format without required default value.
+warn: removing resource com.example.windplotter:string/nfz_server_error_not_allow_unlimit without required default value.
+warn: removing resource com.example.windplotter:string/nfz_server_error_not_login without required default value.
+warn: removing resource com.example.windplotter:string/nfz_server_error_parameter without required default value.
+warn: removing resource com.example.windplotter:string/nfz_server_error_signature without required default value.
+warn: removing resource com.example.windplotter:string/nfz_server_error_sn_empty without required default value.
+warn: removing resource com.example.windplotter:string/nfz_server_error_system_busy without required default value.
+warn: removing resource com.example.windplotter:string/nfz_server_error_too_frequent without required default value.
+warn: removing resource com.example.windplotter:string/nfz_server_error_too_more_unlimit without required default value.
+warn: removing resource com.example.windplotter:string/nfz_server_error_user_not_verify without required default value.
+warn: removing resource com.example.windplotter:string/nfz_unlimit_fail_toast_txt without required default value.
+warn: removing resource com.example.windplotter:string/nfz_unlock_desc_radius without required default value.
+warn: removing resource com.example.windplotter:string/nfz_unlock_new_unlock_type_country without required default value.
+warn: removing resource com.example.windplotter:string/nfz_unlock_new_unlock_type_geo without required default value.
+warn: removing resource com.example.windplotter:string/nfz_unlock_new_unlock_type_height without required default value.
+warn: removing resource com.example.windplotter:string/nfz_unlock_new_unlock_type_polygon without required default value.
+warn: removing resource com.example.windplotter:string/nfz_unlock_new_unlock_type_whitelist without required default value.
+warn: removing resource com.example.windplotter:string/nfz_unlock_special_polygon_desc without required default value.
+warn: removing resource com.example.windplotter:string/nfz_unlock_v3_app_license_too_old without required default value.
+warn: removing resource com.example.windplotter:string/nfz_unlock_v3_app_license_too_old_dynamic without required default value.
+warn: removing resource com.example.windplotter:string/nfz_unlock_v3_error_code without required default value.
+warn: removing resource com.example.windplotter:string/nfz_unlock_v3_error_keyversion_not_got without required default value.
+warn: removing resource com.example.windplotter:string/nfz_unlock_v3_error_keyversion_not_got_importing without required default value.
+warn: removing resource com.example.windplotter:string/nfz_unlock_v3_license_open_fail_user_not_match without required default value.
+warn: removing resource com.example.windplotter:string/nfz_unlock_v3_uav_license_too_old without required default value.
+warn: removing resource com.example.windplotter:string/nfz_unlock_view_map without required default value.
+warn: removing resource com.example.windplotter:string/release_note_1_0 without required default value.
+warn: removing resource com.example.windplotter:string/release_note_1_1 without required default value.
+warn: removing resource com.example.windplotter:string/release_note_1_2 without required default value.
+warn: removing resource com.example.windplotter:string/release_note_1_3 without required default value.
+warn: removing resource com.example.windplotter:string/release_note_1_4 without required default value.
+warn: removing resource com.example.windplotter:string/release_note_1_5 without required default value.
+warn: removing resource com.example.windplotter:string/release_note_1_6 without required default value.
+warn: removing resource com.example.windplotter:string/release_note_1_6_1 without required default value.
+warn: removing resource com.example.windplotter:string/release_note_1_7 without required default value.
+warn: removing resource com.example.windplotter:string/release_note_1_7_2 without required default value.
+warn: removing resource com.example.windplotter:string/release_note_1_8_0 without required default value.
+warn: removing resource com.example.windplotter:string/release_note_1_9_0 without required default value.
+warn: removing resource com.example.windplotter:string/release_note_1_9_2 without required default value.
+warn: removing resource com.example.windplotter:string/release_note_2_4_1 without required default value.
+warn: removing resource com.example.windplotter:string/release_note_3_0_1 without required default value.
+warn: removing resource com.example.windplotter:string/release_note_4_0_1 without required default value.
+warn: removing resource com.example.windplotter:string/release_note_4_1_1 without required default value.
+warn: removing resource com.example.windplotter:string/release_note_5_0_1 without required default value.
+warn: removing resource com.example.windplotter:string/release_note_5_0_2 without required default value.
+warn: removing resource com.example.windplotter:string/release_note_5_1_1 without required default value.
+warn: removing resource com.example.windplotter:string/release_note_5_2_1 without required default value.
+warn: removing resource com.example.windplotter:string/release_note_6_0_1 without required default value.
+warn: removing resource com.example.windplotter:string/release_note_6_0_1_6 without required default value.
+warn: removing resource com.example.windplotter:string/release_note_6_1_1 without required default value.
+warn: removing resource com.example.windplotter:string/release_note_6_1_2 without required default value.
+warn: removing resource com.example.windplotter:string/release_note_7_0 without required default value.
+warn: removing resource com.example.windplotter:string/release_note_7_1_0 without required default value.
+warn: removing resource com.example.windplotter:string/release_note_8_0_0 without required default value.
+warn: removing resource com.example.windplotter:string/release_note_9_0_5 without required default value.
+warn: removing resource com.example.windplotter:string/setting_ui_flyfrb_unlock_refresh_empty without required default value.
+warn: removing resource com.example.windplotter:string/setting_ui_flyfrb_unlock_refresh_fail without required default value.
+warn: removing resource com.example.windplotter:string/setting_ui_flyfrb_unlock_refresh_success without required default value.
+warn: removing resource com.example.windplotter:string/v2_nfz_unlock_geo_type without required default value.
+warn: removing resource com.example.windplotter:string/v2_nfz_unlock_white_list_type without required default value.
+
+> Task :app:processDebugResources
+> Task :app:kaptGenerateStubsDebugKotlin
+> Task :app:kaptDebugKotlin
+
+> Task :app:compileDebugKotlin FAILED
+e: file:///Users/ryuya2/repos/wind_plotter/android-app/app/src/main/java/com/example/windplotter/services/DataCollectionService.kt:20:34 Unresolved reference: KeyKeyListener
+e: file:///Users/ryuya2/repos/wind_plotter/android-app/app/src/main/java/com/example/windplotter/services/DataCollectionService.kt:130:52 Unresolved reference: WIND_SPEED
+e: file:///Users/ryuya2/repos/wind_plotter/android-app/app/src/main/java/com/example/windplotter/services/DataCollectionService.kt:131:53 Unresolved reference: WIND_DIRECTION
+e: file:///Users/ryuya2/repos/wind_plotter/android-app/app/src/main/java/com/example/windplotter/services/DataCollectionService.kt:132:51 Unresolved reference: AIRCRAFT_LOCATION_3D
+e: file:///Users/ryuya2/repos/wind_plotter/android-app/app/src/main/java/com/example/windplotter/services/DataCollectionService.kt:137:37 Unresolved reference: KeyKeyListener
+e: file:///Users/ryuya2/repos/wind_plotter/android-app/app/src/main/java/com/example/windplotter/services/DataCollectionService.kt:137:59 Cannot infer a type for this parameter. Please specify it explicitly.
+e: file:///Users/ryuya2/repos/wind_plotter/android-app/app/src/main/java/com/example/windplotter/services/DataCollectionService.kt:137:69 Cannot infer a type for this parameter. Please specify it explicitly.
+e: file:///Users/ryuya2/repos/wind_plotter/android-app/app/src/main/java/com/example/windplotter/services/DataCollectionService.kt:141:38 Unresolved reference: KeyKeyListener
+e: file:///Users/ryuya2/repos/wind_plotter/android-app/app/src/main/java/com/example/windplotter/services/DataCollectionService.kt:141:70 Cannot infer a type for this parameter. Please specify it explicitly.
+e: file:///Users/ryuya2/repos/wind_plotter/android-app/app/src/main/java/com/example/windplotter/services/DataCollectionService.kt:141:80 Cannot infer a type for this parameter. Please specify it explicitly.
+e: file:///Users/ryuya2/repos/wind_plotter/android-app/app/src/main/java/com/example/windplotter/services/DataCollectionService.kt:148:36 Unresolved reference: KeyKeyListener
+e: file:///Users/ryuya2/repos/wind_plotter/android-app/app/src/main/java/com/example/windplotter/services/DataCollectionService.kt:148:75 Cannot infer a type for this parameter. Please specify it explicitly.
+e: file:///Users/ryuya2/repos/wind_plotter/android-app/app/src/main/java/com/example/windplotter/services/DataCollectionService.kt:148:85 Cannot infer a type for this parameter. Please specify it explicitly.
+e: file:///Users/ryuya2/repos/wind_plotter/android-app/app/src/main/java/com/example/windplotter/services/DataCollectionService.kt:159:20 Not enough information to infer type variable Result
+e: file:///Users/ryuya2/repos/wind_plotter/android-app/app/src/main/java/com/example/windplotter/services/DataCollectionService.kt:160:20 Not enough information to infer type variable Result
+e: file:///Users/ryuya2/repos/wind_plotter/android-app/app/src/main/java/com/example/windplotter/services/DataCollectionService.kt:161:20 Not enough information to infer type variable Result
+e: file:///Users/ryuya2/repos/wind_plotter/android-app/app/src/main/java/com/example/windplotter/services/DataCollectionService.kt:187:34 Suspend function 'insert' should be called only from a coroutine or another suspend function
+e: file:///Users/ryuya2/repos/wind_plotter/android-app/app/src/main/java/com/example/windplotter/services/DataCollectionService.kt:209:29 Unresolved reference: drawable
+e: file:///Users/ryuya2/repos/wind_plotter/android-app/app/src/main/java/com/example/windplotter/ui/screens/MissionCreationScreen.kt:52:34 Unresolved reference. None of the following candidates is applicable because of receiver type mismatch: 
+public inline operator fun <T : Any, R : ClosedRange<TypeVariable(T)>> TypeVariable(R).contains(element: TypeVariable(T)?): Boolean where R : Iterable<TypeVariable(T)> defined in kotlin.ranges
+public inline operator fun <T : Any, R : OpenEndRange<TypeVariable(T)>> TypeVariable(R).contains(element: TypeVariable(T)?): Boolean where R : Iterable<TypeVariable(T)> defined in kotlin.ranges
+public operator fun <T> Array<out TypeVariable(T)>.contains(element: TypeVariable(T)): Boolean defined in kotlin.collections
+public operator fun BooleanArray.contains(element: Boolean): Boolean defined in kotlin.collections
+public operator fun ByteArray.contains(element: Byte): Boolean defined in kotlin.collections
+public operator fun CharArray.contains(element: Char): Boolean defined in kotlin.collections
+public operator fun CharSequence.contains(char: Char, ignoreCase: Boolean = ...): Boolean defined in kotlin.text
+public operator fun CharSequence.contains(other: CharSequence, ignoreCase: Boolean = ...): Boolean defined in kotlin.text
+public inline operator fun CharSequence.contains(regex: Regex): Boolean defined in kotlin.text
+public operator fun IntArray.contains(element: Int): Boolean defined in kotlin.collections
+public operator fun LongArray.contains(element: Long): Boolean defined in kotlin.collections
+public operator fun ShortArray.contains(element: Short): Boolean defined in kotlin.collections
+public operator fun <T> Iterable<TypeVariable(T)>.contains(element: TypeVariable(T)): Boolean defined in kotlin.collections
+public inline operator fun <K, V> Map<out TypeVariable(K), TypeVariable(V)>.contains(key: TypeVariable(K)): Boolean defined in kotlin.collections
+public inline operator fun CharRange.contains(element: Char?): Boolean defined in kotlin.ranges
+public operator fun ClosedRange<Byte>.contains(value: Int): Boolean defined in kotlin.ranges
+public operator fun ClosedRange<Byte>.contains(value: Long): Boolean defined in kotlin.ranges
+public operator fun ClosedRange<Byte>.contains(value: Short): Boolean defined in kotlin.ranges
+public operator fun ClosedRange<Double>.contains(value: Float): Boolean defined in kotlin.ranges
+public operator fun ClosedRange<Float>.contains(value: Double): Boolean defined in kotlin.ranges
+public operator fun ClosedRange<Int>.contains(value: Byte): Boolean defined in kotlin.ranges
+public operator fun ClosedRange<Int>.contains(value: Long): Boolean defined in kotlin.ranges
+public operator fun ClosedRange<Int>.contains(value: Short): Boolean defined in kotlin.ranges
+public operator fun ClosedRange<Long>.contains(value: Byte): Boolean defined in kotlin.ranges
+public operator fun ClosedRange<Long>.contains(value: Int): Boolean defined in kotlin.ranges
+public operator fun ClosedRange<Long>.contains(value: Short): Boolean defined in kotlin.ranges
+public operator fun ClosedRange<Short>.contains(value: Byte): Boolean defined in kotlin.ranges
+public operator fun ClosedRange<Short>.contains(value: Int): Boolean defined in kotlin.ranges
+public operator fun ClosedRange<Short>.contains(value: Long): Boolean defined in kotlin.ranges
+public inline operator fun IntRange.contains(value: Byte): Boolean defined in kotlin.ranges
+public inline operator fun IntRange.contains(element: Int?): Boolean defined in kotlin.ranges
+public inline operator fun IntRange.contains(value: Long): Boolean defined in kotlin.ranges
+public inline operator fun IntRange.contains(value: Short): Boolean defined in kotlin.ranges
+public inline operator fun LongRange.contains(value: Byte): Boolean defined in kotlin.ranges
+public inline operator fun LongRange.contains(value: Int): Boolean defined in kotlin.ranges
+public inline operator fun LongRange.contains(element: Long?): Boolean defined in kotlin.ranges
+public inline operator fun LongRange.contains(value: Short): Boolean defined in kotlin.ranges
+public operator fun OpenEndRange<Byte>.contains(value: Int): Boolean defined in kotlin.ranges
+public operator fun OpenEndRange<Byte>.contains(value: Long): Boolean defined in kotlin.ranges
+public operator fun OpenEndRange<Byte>.contains(value: Short): Boolean defined in kotlin.ranges
+public operator fun OpenEndRange<Double>.contains(value: Float): Boolean defined in kotlin.ranges
+public operator fun OpenEndRange<Int>.contains(value: Byte): Boolean defined in kotlin.ranges
+public operator fun OpenEndRange<Int>.contains(value: Long): Boolean defined in kotlin.ranges
+public operator fun OpenEndRange<Int>.contains(value: Short): Boolean defined in kotlin.ranges
+public operator fun OpenEndRange<Long>.contains(value: Byte): Boolean defined in kotlin.ranges
+public operator fun OpenEndRange<Long>.contains(value: Int): Boolean defined in kotlin.ranges
+public operator fun OpenEndRange<Long>.contains(value: Short): Boolean defined in kotlin.ranges
+public operator fun OpenEndRange<Short>.contains(value: Byte): Boolean defined in kotlin.ranges
+public operator fun OpenEndRange<Short>.contains(value: Int): Boolean defined in kotlin.ranges
+public operator fun OpenEndRange<Short>.contains(value: Long): Boolean defined in kotlin.ranges
+public operator fun UIntRange.contains(value: UByte): Boolean defined in kotlin.ranges
+public inline operator fun UIntRange.contains(element: UInt?): Boolean defined in kotlin.ranges
+public operator fun UIntRange.contains(value: ULong): Boolean defined in kotlin.ranges
+public operator fun UIntRange.contains(value: UShort): Boolean defined in kotlin.ranges
+public operator fun ULongRange.contains(value: UByte): Boolean defined in kotlin.ranges
+public operator fun ULongRange.contains(value: UInt): Boolean defined in kotlin.ranges
+public inline operator fun ULongRange.contains(element: ULong?): Boolean defined in kotlin.ranges
+public operator fun ULongRange.contains(value: UShort): Boolean defined in kotlin.ranges
+public operator fun <T> Sequence<TypeVariable(T)>.contains(element: TypeVariable(T)): Boolean defined in kotlin.sequences
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:compileDebugKotlin'.
+> A failure occurred while executing org.jetbrains.kotlin.compilerRunner.GradleCompilerRunnerWithWorkers$GradleKotlinCompilerWorkAction
+   > Compilation error. See log for more details
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 5s
+16 actionable tasks: 8 executed, 8 up-to-date

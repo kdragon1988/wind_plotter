@@ -47,6 +47,7 @@ import com.example.windplotter.viewmodel.MainViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import com.example.windplotter.ui.components.WindSpeedGraph
 import kotlin.math.max
 
 @Composable
@@ -105,13 +106,29 @@ fun DashboardScreen(
                 colors = CardDefaults.cardColors(containerColor = Color.White),
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
             ) {
-                Column(modifier = Modifier.padding(8.dp)) {
+              // Graph Area
+                Column(modifier = Modifier.fillMaxSize().padding(8.dp)) {
                     Text("Wind Speed History", style = MaterialTheme.typography.labelMedium, color = Color.Gray)
                     Spacer(modifier = Modifier.height(4.dp))
-                    WindSpeedGraph(
-                        samples = missionSamples,
-                        modifier = Modifier.fillMaxSize()
-                    )
+                    Box(
+                        modifier = Modifier
+                            .weight(1f) // Takes remaining vertical space
+                            .fillMaxWidth()
+                            .background(Color(0xFF222222), RoundedCornerShape(8.dp))
+                    ) {
+                        if (missionSamples.isEmpty()) {
+                            Text(
+                                "Waiting for data...",
+                                color = Color.Gray,
+                                modifier = Modifier.align(Alignment.Center)
+                            )
+                        } else {
+                            WindSpeedGraph(
+                                samples = missionSamples,
+                                modifier = Modifier.fillMaxSize()
+                            )
+                        }
+                    }
                 }
             }
 
@@ -249,81 +266,7 @@ fun MetricContent(label: String, value: String, unit: String, isLarge: Boolean =
     }
 }
 
-@Composable
-fun WindSpeedGraph(
-    samples: List<Sample>,
-    modifier: Modifier = Modifier
-) {
-    if (samples.isEmpty()) {
-        Box(modifier = modifier, contentAlignment = Alignment.Center) {
-            Text("No Data", color = Color.Gray)
-        }
-        return
-    }
 
-    // Graph Configuration
-    val maxSpeed = max(samples.maxOfOrNull { it.windSpeed } ?: 5f, 5f) // Minimum 5m/s scale
-    val lineColor = MaterialTheme.colorScheme.primary
-    val areaColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
-
-    Canvas(modifier = modifier) {
-        val width = size.width
-        val height = size.height
-        val padding = 10f
-
-        val path = Path()
-        
-        // Reverse samples to be chronological (Oldest -> Newest) for drawing
-        // *Assuming getSamplesForMission returns ordered by seq ASC. 
-        // If it's the full list, it usually is ASC.
-        // Let's assume samples is ASC.
-        
-        val count = samples.size
-        if (count < 2) return@Canvas
-
-        val stepX = width / (count - 1).coerceAtLeast(1)
-        
-        samples.forEachIndexed { index, sample ->
-            val x = index * stepX
-            // Y is inverted (0 at top). Map speed 0..max to height..0
-            val ratio = (sample.windSpeed / maxSpeed).coerceIn(0f, 1f)
-            val y = height - (ratio * height)
-            
-            if (index == 0) {
-                path.moveTo(x, y)
-            } else {
-                path.lineTo(x, y)
-            }
-        }
-
-        // Draw Line
-        drawPath(
-            path = path,
-            color = lineColor,
-            style = Stroke(width = 3.dp.toPx(), cap = StrokeCap.Round)
-        )
-        
-        // Fill Area
-        val fillPath = Path()
-        fillPath.addPath(path)
-        fillPath.lineTo(width, height)
-        fillPath.lineTo(0f, height)
-        fillPath.close()
-        
-        drawPath(
-            path = fillPath,
-            color = areaColor
-        )
-        
-        // Draw Reference Line for Max Speed (optional)
-        drawLine(
-            color = Color.Gray.copy(alpha=0.5f),
-            start = Offset(0f, 0f),
-            end = Offset(width, 0f),
-            strokeWidth = 1.dp.toPx()
-        )
-    }
-}
 
 @Composable
 fun CompactLogRow(sample: Sample) {

@@ -22,4 +22,7 @@ interface MissionDao {
 
     @Query("SELECT * FROM missions WHERE status = 'RECORDING'")
     suspend fun getActiveMission(): Mission?
+
+    @androidx.room.Delete
+    suspend fun delete(mission: Mission)
 }

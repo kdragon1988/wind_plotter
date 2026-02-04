@@ -16,6 +16,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.windplotter.ui.screens.DashboardScreen
 import com.example.windplotter.ui.screens.MissionCreationScreen
+import com.example.windplotter.ui.screens.MissionListScreen
 import com.example.windplotter.viewmodel.MainViewModel
 import com.example.windplotter.viewmodel.MainViewModelFactory
 
@@ -104,6 +105,9 @@ class MainActivity : ComponentActivity() {
                                         navController.navigate("dashboard") {
                                             popUpTo("start") { inclusive = true }
                                         }
+                                    },
+                                    onNavigateToHistory = {
+                                        navController.navigate("mission_list")
                                     }
                                 )
                             }
@@ -112,12 +116,34 @@ class MainActivity : ComponentActivity() {
                                 DashboardScreen(
                                     viewModel = viewModel,
                                     onMissionStopped = {
-                                        // For MVP, just go back to start screen when stopped
                                         navController.navigate("start") {
                                             popUpTo("dashboard") { inclusive = true }
                                         }
                                     }
                                 )
+                            }
+
+                            composable("mission_list") {
+                                MissionListScreen(
+                                    viewModel = viewModel,
+                                    onBack = {
+                                        navController.popBackStack()
+                                    },
+                                    onMissionClick = { missionId ->
+                                        navController.navigate("detail/$missionId")
+                                    }
+                                )
+                            }
+                            
+                            composable("detail/{missionId}") { backStackEntry ->
+                                val missionId = backStackEntry.arguments?.getString("missionId")
+                                if (missionId != null) {
+                                    com.example.windplotter.ui.screens.MissionDetailScreen(
+                                        missionId = missionId,
+                                        viewModel = viewModel,
+                                        onBack = { navController.popBackStack() }
+                                    )
+                                }
                             }
                         }
                     }
