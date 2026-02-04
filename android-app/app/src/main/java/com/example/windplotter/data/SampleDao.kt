@@ -24,4 +24,7 @@ interface SampleDao {
     
     @Query("SELECT COUNT(*) FROM samples WHERE missionId = :missionId")
     fun getSampleCount(missionId: String): Flow<Int>
+    
+    @Query("SELECT * FROM samples WHERE missionId = :missionId ORDER BY timestamp DESC LIMIT 1")
+    fun getLatestSample(missionId: String): Flow<Sample?>
 }

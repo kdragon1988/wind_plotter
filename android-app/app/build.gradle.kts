@@ -92,12 +92,8 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
     
     // DJI SDK Dependencies
-    implementation("com.dji:dji-sdk-v5-aircraft:5.9.0") {
-        exclude(group = "org.jetbrains.kotlin")
-    }
-    compileOnly("com.dji:dji-sdk-v5-aircraft-provided:5.9.0") {
-        exclude(group = "org.jetbrains.kotlin")
-    }
+    implementation("com.dji:dji-sdk-v5-aircraft:5.9.0")
+    compileOnly("com.dji:dji-sdk-v5-aircraft-provided:5.9.0")
     
     // Room (Database)
     val roomVersion = "2.6.1"

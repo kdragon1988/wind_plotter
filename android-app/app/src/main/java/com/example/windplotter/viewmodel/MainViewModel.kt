@@ -1,5 +1,7 @@
 package com.example.windplotter.viewmodel
 
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -8,18 +10,23 @@ import com.example.windplotter.data.Mission
 import com.example.windplotter.data.MissionDao
 import com.example.windplotter.data.Sample
 import com.example.windplotter.data.SampleDao
+import com.example.windplotter.services.DataCollectionService
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class MainViewModel(
+    application: Application,
     private val missionDao: MissionDao,
     private val sampleDao: SampleDao
-) : ViewModel() {
+) : AndroidViewModel(application) {
 
     // Current active mission (if any)
     private val _currentMission = MutableStateFlow<Mission?>(null)
@@ -27,35 +34,49 @@ class MainViewModel(
 
     // Status of SDK registration
     val sdkRegistered = DJIConnectionManager.isRegistered
-    val sdkInitState = DJIConnectionManager.sdkInitState
+    val sdkInitState = DJIConnectionManager.isRegistered
 
-    // Mock Live Data (Placeholder until SDK Listener implementation)
-    private val _currentWindSpeed = MutableStateFlow(0.0f)
-    val currentWindSpeed: StateFlow<Float> = _currentWindSpeed.asStateFlow()
+    // Live Data observed from DB
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val latestSample: StateFlow<Sample?> = _currentMission.flatMapLatest { mission ->
+        if (mission != null) {
+            sampleDao.getLatestSample(mission.missionId)
+        } else {
+            flowOf(null)
+        }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
-    private val _currentWindDirection = MutableStateFlow(0.0f)
-    val currentWindDirection: StateFlow<Float> = _currentWindDirection.asStateFlow()
-    
-    // Sample count for current mission
-    val sampleCount = _currentMission.combine(sampleDao.getSampleCount("")) { mission, _ ->
-         if (mission != null) {
-             // Re-query with actual ID would be better, but for flow logic we might need a flat map
-             // Simplified for now: we will just observe DB count when mission is active
-             0 // Placeholder, logic below is better
-         } else {
-             0
-         }
-    }
+    val currentWindSpeed: StateFlow<Float> = latestSample.map { it?.windSpeed ?: 0f }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0f)
+
+    val currentWindDirection: StateFlow<Float> = latestSample.map { it?.windDirection ?: 0f }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0f)
+
+    val currentAltitude: StateFlow<Double> = latestSample.map { it?.altitude ?: 0.0 }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0.0)
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val sampleCount = _currentMission.flatMapLatest { mission ->
+        if (mission != null) {
+            sampleDao.getSampleCount(mission.missionId)
+        } else {
+            flowOf(0)
+        }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
 
     init {
         checkActiveMission()
-        startMockDataUpdates() // For UI testing
     }
 
     private fun checkActiveMission() {
         viewModelScope.launch {
             val active = missionDao.getActiveMission()
             _currentMission.value = active
+            // If there is an active mission on startup, restart the service?
+            // Ideally yes, to resume recording if app crashed.
+            if (active != null && active.status == "RECORDING") {
+                DataCollectionService.start(getApplication(), active.missionId)
+            }
         }
     }
 
@@ -69,6 +90,9 @@ class MainViewModel(
             )
             missionDao.insert(newMission)
             _currentMission.value = newMission
+            
+            // Start Service
+            DataCollectionService.start(getApplication(), newMission.missionId)
         }
     }
 
@@ -78,46 +102,23 @@ class MainViewModel(
                 val finishedMission = mission.copy(status = "FINISHED")
                 missionDao.update(finishedMission)
                 _currentMission.value = null
-            }
-        }
-    }
-    
-    // Preliminary method to simulate data coming in
-    private fun startMockDataUpdates() {
-        viewModelScope.launch {
-            while (true) {
-                kotlinx.coroutines.delay(1000)
-                if (_currentMission.value != null) {
-                    // Random fluctuation
-                    _currentWindSpeed.value = (Math.random() * 10).toFloat()
-                    _currentWindDirection.value = (Math.random() * 360).toFloat()
-                    
-                    // Save sample
-                    val sample = Sample(
-                        missionId = _currentMission.value!!.missionId,
-                        timestamp = System.currentTimeMillis(),
-                        seq = (System.currentTimeMillis() / 1000).toInt(), // Simplified seq
-                        latitude = 35.6895,
-                        longitude = 139.6917,
-                        altitude = 100.0,
-                        windSpeed = _currentWindSpeed.value,
-                        windDirection = _currentWindDirection.value
-                    )
-                    sampleDao.insert(sample)
-                }
+                
+                // Stop Service
+                DataCollectionService.stop(getApplication())
             }
         }
     }
 }
 
 class MainViewModelFactory(
+    private val application: Application,
     private val missionDao: MissionDao,
     private val sampleDao: SampleDao
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(MainViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return MainViewModel(missionDao, sampleDao) as T
+            return MainViewModel(application, missionDao, sampleDao) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

@@ -18,6 +18,8 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
 
     <uses-feature android:name="android.hardware.camera" />
     <uses-feature android:name="android.hardware.camera.autofocus" />
@@ -36,12 +38,18 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.WindPlotter"
         tools:replace="android:allowBackup,android:extractNativeLibs"
-        tools:targetApi="31">
+        tools:targetApi="34">
 
         <!-- DJI SDK Key -->
         <meta-data
             android:name="com.dji.sdk.API_KEY"
             android:value="7d7bb54b17208e5952dcd321" />
+
+        <service
+            android:name=".services.DataCollectionService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="location" />
 
         <activity
             android:name=".MainActivity"

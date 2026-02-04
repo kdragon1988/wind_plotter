@@ -43,6 +43,7 @@ fun DashboardScreen(
     val windSpeed by viewModel.currentWindSpeed.collectAsState()
     val windDirection by viewModel.currentWindDirection.collectAsState()
     val sdkRegistered by viewModel.sdkRegistered.collectAsState()
+    val altitude by viewModel.currentAltitude.collectAsState()
     
     // Status color
     val statusColor = if (currentMission != null) Color(0xFF4CAF50) else Color.Gray
@@ -145,7 +146,7 @@ fun DashboardScreen(
                 ) {
                     Text("Altitude", style = MaterialTheme.typography.titleMedium)
                     Text(
-                        text = "100m", // Dummy for now
+                        text = String.format(Locale.US, "%.1fm", altitude),
                         style = MaterialTheme.typography.displayMedium
                     )
                 }

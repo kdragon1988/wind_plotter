@@ -60,6 +60,7 @@ class MainActivity : ComponentActivity() {
                 ) {
                     val viewModel: MainViewModel = viewModel(
                         factory = MainViewModelFactory(
+                            app,
                             app.database.missionDao(),
                             app.database.sampleDao()
                         )
