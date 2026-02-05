@@ -34,10 +34,10 @@
         android:name=".WindPlotterApp"
         android:allowBackup="false"
         android:extractNativeLibs="true"
-        android:label="@string/app_name"
+        android:label="@string/wind_plotter_app_name"
         android:supportsRtl="true"
         android:theme="@style/Theme.WindPlotter"
-        tools:replace="android:allowBackup,android:extractNativeLibs"
+        tools:replace="android:allowBackup,android:extractNativeLibs,android:label"
         tools:targetApi="34">
 
         <!-- DJI SDK Key -->
@@ -54,6 +54,7 @@
         <activity
             android:name=".MainActivity"
             android:exported="true"
+            android:label="@string/wind_plotter_app_name"
             android:theme="@style/Theme.WindPlotter">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

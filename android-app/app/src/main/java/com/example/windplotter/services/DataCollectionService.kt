@@ -192,7 +192,7 @@ class DataCollectionService : Service() {
             latitude = currentLatitude,
             longitude = currentLongitude,
             altitude = currentAltitude,
-            windSpeed = currentWindSpeed.toFloat(),
+            windSpeed = currentWindSpeed.toFloat() / 10.0f, // SDK returns decimeters/sec, convert to m/s
             windDirection = currentWindDirection.toFloat(),
             windWarningLevel = currentWindSpeed 
         )
