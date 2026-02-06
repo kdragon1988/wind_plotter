@@ -1,6 +1,8 @@
 package com.example.windplotter.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,36 +16,35 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.example.windplotter.data.Sample
+import com.example.windplotter.ui.components.TacticalPanel
+import com.example.windplotter.ui.components.TacticalUi
 import com.example.windplotter.ui.components.WindSpeedGraph
+import com.example.windplotter.ui.components.tacticalBackground
 import com.example.windplotter.viewmodel.MainViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import java.util.concurrent.TimeUnit
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MissionDetailScreen(
     missionId: String,
@@ -51,151 +52,362 @@ fun MissionDetailScreen(
     onBack: () -> Unit,
     onResumeMission: (String) -> Unit
 ) {
-    val stats by viewModel.getMissionStats(missionId).collectAsState(initial = null)
     val samples by viewModel.getMissionSamples(missionId).collectAsState(initial = emptyList())
     val allMissions by viewModel.allMissions.collectAsState()
     val mission = allMissions.find { it.missionId == missionId }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text(mission?.name ?: "Mission Analysis") },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
-                    }
-                }
-            )
+    var selectedSession by remember(missionId) { mutableStateOf<Int?>(null) } // null = ALL
+    val sessionIndexes = remember(samples) { samples.map { it.sessionIndex }.distinct().sorted() }
+
+    LaunchedEffect(sessionIndexes, selectedSession) {
+        if (selectedSession != null && selectedSession !in sessionIndexes) {
+            selectedSession = null
         }
-    ) { paddingValues ->
-        if (mission == null) {
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator()
-            }
-        } else {
-            Row(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .padding(16.dp)
+    }
+
+    val filteredSamples = remember(samples, selectedSession) {
+        if (selectedSession == null) samples else samples.filter { it.sessionIndex == selectedSession }
+    }
+    val stats = remember(filteredSamples) { buildAnalysisStats(filteredSamples) }
+    val sessionLabel = selectedSession?.let { "S$it" } ?: "ALL"
+
+    if (mission == null) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .tacticalBackground(),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator(color = TacticalUi.accent)
+        }
+        return
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .tacticalBackground()
+            .padding(10.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(46.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            TacticalPanel(
+                title = "BACK",
+                modifier = Modifier.weight(0.42f),
+                bodyPadding = 6.dp,
+                titleBottomSpacing = 1.dp
             ) {
-                // --- Left Column: Stats Cards (30%) ---
-                Column(
-                    modifier = Modifier
-                        .weight(0.35f)
-                        .fillMaxHeight()
-                        .verticalScroll(rememberScrollState()),
-                    verticalArrangement = Arrangement.Top
+                Button(
+                    onClick = onBack,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(containerColor = TacticalUi.panelTint.copy(alpha = 0.45f))
                 ) {
-                    Text("Basic Info", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                    Spacer(modifier = Modifier.height(8.dp))
-                    
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                    Text(
+                        "HOME",
+                        color = TacticalUi.text,
+                        fontFamily = FontFamily.Monospace,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 10.sp
+                    )
+                }
+            }
+
+            TacticalPanel(
+                title = "REPORT",
+                modifier = Modifier.weight(1.58f),
+                bodyPadding = 8.dp,
+                titleBottomSpacing = 1.dp
+            ) {
+                Text(
+                    text = mission.name,
+                    color = TacticalUi.text,
+                    fontFamily = FontFamily.Monospace,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 11.sp,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+
+            TacticalPanel(
+                title = "TARGET",
+                modifier = Modifier.weight(1f),
+                bodyPadding = 8.dp,
+                titleBottomSpacing = 1.dp
+            ) {
+                Text(
+                    text = sessionLabel,
+                    color = TacticalUi.accent,
+                    fontFamily = FontFamily.Monospace,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 11.sp
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        Row(
+            modifier = Modifier
+                .fillMaxSize(),
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Column(
+                modifier = Modifier
+                    .weight(0.44f)
+                    .fillMaxHeight(),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                TacticalPanel(
+                    title = "SESSION SELECT",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(0.22f)
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .horizontalScroll(rememberScrollState()),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
-                        Column(modifier = Modifier.padding(16.dp)) {
-                            Text("Assignee", style = MaterialTheme.typography.labelMedium, color = Color.Gray)
-                            Text(mission.assignee, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold)
-                            
-                            if (!mission.note.isNullOrEmpty()) {
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Text("Note", style = MaterialTheme.typography.labelMedium, color = Color.Gray)
-                                Text(mission.note, style = MaterialTheme.typography.bodyMedium)
-                            }
+                        SessionButton(
+                            label = "ALL",
+                            selected = selectedSession == null,
+                            onClick = { selectedSession = null }
+                        )
+                        sessionIndexes.forEach { session ->
+                            SessionButton(
+                                label = "S$session",
+                                selected = selectedSession == session,
+                                onClick = { selectedSession = session }
+                            )
                         }
                     }
+                }
 
-                    Spacer(modifier = Modifier.height(12.dp))
+                TacticalPanel(
+                    title = "ANALYSIS",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(0.44f)
+                ) {
+                    InfoLine("SAMPLES", stats.count.toString())
+                    InfoLine("MAX WIND", String.format(Locale.US, "%.1f m/s", stats.maxWind))
+                    InfoLine("AVG WIND", String.format(Locale.US, "%.1f m/s", stats.avgWind))
+                    InfoLine("AVG ALT", String.format(Locale.US, "%.1f m", stats.avgAlt))
+                    InfoLine("MAIN DIR", stats.mainDirection)
+                    InfoLine("RISK COUNT", "${stats.cautionCount + stats.dangerCount}")
+                }
+
+                TacticalPanel(
+                    title = "MISSION INFO",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(0.34f)
+                ) {
+                    InfoLine("ASSIGNEE", mission.assignee)
+                    InfoLine("CREATED", formatDateTime(mission.createdAt))
+                    if (!mission.note.isNullOrBlank()) {
+                        InfoLine("NOTE", mission.note)
+                    }
+                    Spacer(modifier = Modifier.height(6.dp))
                     Button(
                         onClick = { onResumeMission(missionId) },
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(42.dp)
+                            .border(1.dp, TacticalUi.border, RoundedCornerShape(10.dp)),
+                        colors = ButtonDefaults.buttonColors(containerColor = TacticalUi.panelTint.copy(alpha = 0.55f))
                     ) {
-                        Text("Resume In Operation UI")
-                    }
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    if (stats != null) {
-                        val s = stats!!
-                        val durationMs = s.endTime - s.startTime
-                        val durationStr = if (durationMs > 0) {
-                            val min = TimeUnit.MILLISECONDS.toMinutes(durationMs)
-                            val sec = TimeUnit.MILLISECONDS.toSeconds(durationMs) % 60
-                            String.format("%02d:%02d", min, sec)
-                        } else "00:00"
-                        
-                        StatsCard("Duration & Time") {
-                            StatsRow("Duration", durationStr)
-                            val df = SimpleDateFormat("HH:mm", Locale.getDefault())
-                            StatsRow("Start", df.format(Date(s.startTime)))
-                            StatsRow("End", df.format(Date(s.endTime)))
-                        }
-                        
-                        Spacer(modifier = Modifier.height(16.dp))
-                        
-                        StatsCard("Wind & Altitude") {
-                            StatsRow("Max Wind", String.format("%.1f m/s", s.maxWindSpeed))
-                            StatsRow("Avg Wind", String.format("%.1f m/s", s.avgWindSpeed))
-                            StatsRow("Avg Alt", String.format("%.1f m", s.avgAltitude))
-                        }
-                    } else {
-                        Text("No statistics available", color = Color.Gray)
+                        Text(
+                            "RESUME OPERATION UI",
+                            color = TacticalUi.text,
+                            fontFamily = FontFamily.Monospace,
+                            fontSize = 10.sp
+                        )
                     }
                 }
+            }
 
-                Spacer(modifier = Modifier.width(16.dp))
-
-                // --- Right Column: Graph (70%) ---
-                Column(
+            Column(
+                modifier = Modifier
+                    .weight(0.56f)
+                    .fillMaxHeight(),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                TacticalPanel(
+                    title = "WIND TREND [$sessionLabel]",
                     modifier = Modifier
-                        .weight(0.65f)
-                        .fillMaxHeight()
+                        .fillMaxWidth()
+                        .weight(0.76f)
                 ) {
-                    Text("Wind Speed Trend", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                    Spacer(modifier = Modifier.height(8.dp))
-                    
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
-                            .background(Color(0xFF222222), RoundedCornerShape(8.dp))
+                            .background(TacticalUi.panelTint.copy(alpha = 0.28f), RoundedCornerShape(8.dp))
                     ) {
-                        if (samples.isEmpty()) {
-                            Text("No graph data", color = Color.Gray, modifier = Modifier.align(Alignment.Center))
+                        if (filteredSamples.isEmpty()) {
+                            Text(
+                                "No data for selected session",
+                                color = TacticalUi.muted,
+                                fontFamily = FontFamily.Monospace,
+                                fontSize = 11.sp,
+                                modifier = Modifier.align(Alignment.Center)
+                            )
                         } else {
                             WindSpeedGraph(
-                                samples = samples,
+                                samples = filteredSamples,
                                 modifier = Modifier.fillMaxSize()
                             )
                         }
                     }
                 }
+
+                TacticalPanel(
+                    title = "TIME WINDOW",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(0.24f)
+                ) {
+                    InfoLine("START", stats.startTimeText)
+                    InfoLine("END", stats.endTimeText)
+                    InfoLine("DURATION", stats.durationText)
+                    InfoLine("DANGER(>=10)", stats.dangerCount.toString(), TacticalUi.danger)
+                }
             }
         }
     }
 }
 
 @Composable
-fun StatsCard(title: String, content: @Composable () -> Unit) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+private fun SessionButton(
+    label: String,
+    selected: Boolean,
+    onClick: () -> Unit
+) {
+    Button(
+        onClick = onClick,
+        colors = ButtonDefaults.buttonColors(
+            containerColor = if (selected) TacticalUi.accent.copy(alpha = 0.25f) else TacticalUi.panelTint.copy(alpha = 0.5f)
+        ),
+        modifier = Modifier.height(34.dp)
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(title, style = MaterialTheme.typography.titleSmall, color = Color.Gray)
-            Spacer(modifier = Modifier.height(8.dp))
-            content()
-        }
+        Text(
+            text = label,
+            color = if (selected) TacticalUi.accent else TacticalUi.text,
+            fontFamily = FontFamily.Monospace,
+            fontWeight = FontWeight.SemiBold,
+            fontSize = 10.sp
+        )
     }
 }
 
 @Composable
-fun StatsRow(label: String, value: String) {
+private fun InfoLine(label: String, value: String, valueColor: androidx.compose.ui.graphics.Color = TacticalUi.text) {
     Row(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-        horizontalArrangement = Arrangement.SpaceBetween
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(label, style = MaterialTheme.typography.bodyMedium)
-        Text(value, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
+        Text(
+            text = label,
+            color = TacticalUi.muted,
+            fontFamily = FontFamily.Monospace,
+            fontSize = 10.sp
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(
+            text = value,
+            modifier = Modifier.weight(1f),
+            color = valueColor,
+            fontFamily = FontFamily.Monospace,
+            fontWeight = FontWeight.SemiBold,
+            fontSize = 10.sp,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+    }
+    Spacer(modifier = Modifier.height(3.dp))
+}
+
+private data class AnalysisStats(
+    val count: Int,
+    val maxWind: Float,
+    val avgWind: Float,
+    val avgAlt: Double,
+    val mainDirection: String,
+    val cautionCount: Int,
+    val dangerCount: Int,
+    val startTimeText: String,
+    val endTimeText: String,
+    val durationText: String
+)
+
+private fun buildAnalysisStats(samples: List<Sample>): AnalysisStats {
+    if (samples.isEmpty()) {
+        return AnalysisStats(
+            count = 0,
+            maxWind = 0f,
+            avgWind = 0f,
+            avgAlt = 0.0,
+            mainDirection = "--",
+            cautionCount = 0,
+            dangerCount = 0,
+            startTimeText = "--",
+            endTimeText = "--",
+            durationText = "00:00"
+        )
+    }
+
+    val maxWind = samples.maxOf { it.windSpeed }
+    val avgWind = samples.map { it.windSpeed }.average().toFloat()
+    val avgAlt = samples.map { it.altitude }.average()
+    val cautionCount = samples.count { it.windSpeed >= 5f && it.windSpeed < 10f }
+    val dangerCount = samples.count { it.windSpeed >= 10f }
+    val start = samples.minOf { it.timestamp }
+    val end = samples.maxOf { it.timestamp }
+    val durationMs = (end - start).coerceAtLeast(0L)
+    val min = TimeUnit.MILLISECONDS.toMinutes(durationMs)
+    val sec = TimeUnit.MILLISECONDS.toSeconds(durationMs) % 60
+    val direction = samples
+        .groupingBy { toDirectionText(it.windDirection) }
+        .eachCount()
+        .maxByOrNull { it.value }
+        ?.key ?: "--"
+
+    return AnalysisStats(
+        count = samples.size,
+        maxWind = maxWind,
+        avgWind = avgWind,
+        avgAlt = avgAlt,
+        mainDirection = direction,
+        cautionCount = cautionCount,
+        dangerCount = dangerCount,
+        startTimeText = formatDateTime(start),
+        endTimeText = formatDateTime(end),
+        durationText = String.format(Locale.getDefault(), "%02d:%02d", min, sec)
+    )
+}
+
+private fun formatDateTime(ts: Long): String {
+    return SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.getDefault()).format(Date(ts))
+}
+
+private fun toDirectionText(directionDeg: Float): String {
+    val normalized = ((directionDeg % 360f) + 360f) % 360f
+    val index = (((normalized + 22.5f) % 360f) / 45f).toInt()
+    return when (index) {
+        0 -> "北"
+        1 -> "北東"
+        2 -> "東"
+        3 -> "南東"
+        4 -> "南"
+        5 -> "南西"
+        6 -> "西"
+        else -> "北西"
     }
 }

@@ -1,5 +1,6 @@
 package com.example.windplotter.ui.screens
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -10,14 +11,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -26,16 +25,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.example.windplotter.ui.components.TacticalPanel
+import com.example.windplotter.ui.components.TacticalUi
+import com.example.windplotter.ui.components.tacticalBackground
 import com.example.windplotter.viewmodel.MainViewModel
-import androidx.compose.foundation.Image
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.layout.ContentScale
-import com.example.windplotter.R
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MissionCreationScreen(
     viewModel: MainViewModel,
@@ -47,110 +46,204 @@ fun MissionCreationScreen(
     var assignee by remember { mutableStateOf("") }
     var note by remember { mutableStateOf("") }
 
-    // Scroll state for landscape support (failsafe)
-    val scrollState = rememberScrollState()
+    val canStart = missionName.isNotBlank() && assignee.isNotBlank()
+    val sdkText = sdkState.toString()
+    val sdkReady = sdkText.contains("Registered", ignoreCase = true) || sdkText.contains("Ready", ignoreCase = true)
 
-    Row(
+    Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically
+            .tacticalBackground()
+            .padding(10.dp)
     ) {
-        // --- Left Column: Inputs (Weight 1.2) ---
-        Column(
+        Row(
             modifier = Modifier
-                .weight(1.2f)
-                .fillMaxHeight()
-                .verticalScroll(scrollState),
-            verticalArrangement = Arrangement.Center
+                .fillMaxWidth()
+                .height(46.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            Image(
-                painter = painterResource(id = R.drawable.visionoid_logo),
-                contentDescription = "Logo",
-                modifier = Modifier.width(180.dp), // Slightly wider for text logo
-                contentScale = ContentScale.Fit
-            )
-            
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Text(
-                text = "Create New Mission",
-                style = MaterialTheme.typography.titleLarge, // Smaller headline
-                fontWeight = FontWeight.Bold
-            )
-            
-            Text(
-                text = "SDK Status: $sdkState",
-                style = MaterialTheme.typography.bodySmall,
-                color = if (sdkState.toString().contains("Registered")) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
-            )
-            
-            Spacer(modifier = Modifier.height(12.dp))
-
-            OutlinedTextField(
-                value = missionName,
-                onValueChange = { missionName = it },
-                label = { Text("Mission Name") },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            OutlinedTextField(
-                value = assignee,
-                onValueChange = { assignee = it },
-                label = { Text("Assignee") },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            OutlinedTextField(
-                value = note,
-                onValueChange = { note = it },
-                label = { Text("Note (Optional)") },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(80.dp), // Fixed height for note
-                minLines = 2,
-                maxLines = 3
-            )
-        }
-
-        Spacer(modifier = Modifier.width(32.dp))
-
-        // --- Right Column: Actions (Weight 0.8) ---
-        Column(
-            modifier = Modifier
-                .weight(0.8f)
-                .fillMaxHeight(),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Button(
-                onClick = {
-                    if (missionName.isNotBlank() && assignee.isNotBlank()) {
-                        viewModel.startMission(missionName, assignee, note)
-                        onMissionStarted()
-                    }
-                },
-                enabled = missionName.isNotBlank() && assignee.isNotBlank(),
-                modifier = Modifier.fillMaxWidth().height(64.dp)
+            TacticalPanel(
+                title = "WIND PLOTTER",
+                modifier = Modifier.weight(1.2f),
+                bodyPadding = 8.dp,
+                titleBottomSpacing = 2.dp
             ) {
-                Text("Open Operation UI", style = MaterialTheme.typography.titleMedium)
+                Text(
+                    text = "TACTICAL MISSION CONSOLE",
+                    color = TacticalUi.text,
+                    fontFamily = FontFamily.Monospace,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 11.sp,
+                    maxLines = 1
+                )
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
-
-            TextButton(
-                onClick = onNavigateToHistory,
-                modifier = Modifier.fillMaxWidth()
+            TacticalPanel(
+                title = "SDK STATUS",
+                modifier = Modifier.weight(1.8f),
+                bodyPadding = 8.dp,
+                titleBottomSpacing = 2.dp
             ) {
-                Text("View History")
+                Text(
+                    text = sdkText,
+                    color = if (sdkReady) TacticalUi.good else TacticalUi.warn,
+                    fontFamily = FontFamily.Monospace,
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 11.sp,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        Row(
+            modifier = Modifier
+                .fillMaxSize(),
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            TacticalPanel(
+                title = "MISSION FORM",
+                modifier = Modifier
+                    .weight(1.28f)
+                    .fillMaxHeight(),
+                bodyPadding = 12.dp
+            ) {
+                FormField(
+                    label = "MISSION NAME",
+                    value = missionName,
+                    onValueChange = { missionName = it },
+                    singleLine = true
+                )
+                Spacer(modifier = Modifier.height(10.dp))
+                FormField(
+                    label = "ASSIGNEE",
+                    value = assignee,
+                    onValueChange = { assignee = it },
+                    singleLine = true
+                )
+                Spacer(modifier = Modifier.height(10.dp))
+                FormField(
+                    label = "NOTE",
+                    value = note,
+                    onValueChange = { note = it },
+                    singleLine = false,
+                    minLines = 3,
+                    maxLines = 4
+                )
+            }
+
+            Column(
+                modifier = Modifier
+                    .weight(0.72f)
+                    .fillMaxHeight(),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                TacticalPanel(
+                    title = "START",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(0.68f),
+                    bodyPadding = 12.dp
+                ) {
+                    Button(
+                        onClick = {
+                            viewModel.startMission(missionName, assignee, note.ifBlank { null })
+                            onMissionStarted()
+                        },
+                        enabled = canStart,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(58.dp)
+                            .border(1.dp, TacticalUi.border, RoundedCornerShape(10.dp)),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = if (canStart) TacticalUi.accent.copy(alpha = 0.26f) else TacticalUi.panelTint,
+                            disabledContainerColor = TacticalUi.panelTint.copy(alpha = 0.7f)
+                        )
+                    ) {
+                        Text(
+                            "OPEN OPERATION UI",
+                            color = TacticalUi.text,
+                            fontFamily = FontFamily.Monospace,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 12.sp
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(10.dp))
+                    Text(
+                        text = if (canStart) "Ready for deployment" else "Enter mission name and assignee",
+                        color = if (canStart) TacticalUi.good else TacticalUi.muted,
+                        fontFamily = FontFamily.Monospace,
+                        fontSize = 10.sp
+                    )
+                }
+
+                TacticalPanel(
+                    title = "REPORT",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(0.32f),
+                    bodyPadding = 10.dp
+                ) {
+                    Button(
+                        onClick = onNavigateToHistory,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(48.dp)
+                            .border(1.dp, TacticalUi.border, RoundedCornerShape(10.dp)),
+                        colors = ButtonDefaults.buttonColors(containerColor = TacticalUi.panelTint.copy(alpha = 0.55f))
+                    ) {
+                        Text(
+                            "VIEW HISTORY / REPORT",
+                            color = TacticalUi.text,
+                            fontFamily = FontFamily.Monospace,
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 11.sp
+                        )
+                    }
+                }
             }
         }
     }
+}
+
+@Composable
+private fun FormField(
+    label: String,
+    value: String,
+    onValueChange: (String) -> Unit,
+    singleLine: Boolean,
+    minLines: Int = 1,
+    maxLines: Int = 1
+) {
+    OutlinedTextField(
+        value = value,
+        onValueChange = onValueChange,
+        modifier = Modifier.fillMaxWidth(),
+        label = {
+            Text(
+                text = label,
+                color = TacticalUi.muted,
+                fontFamily = FontFamily.Monospace,
+                fontSize = 10.sp
+            )
+        },
+        singleLine = singleLine,
+        minLines = minLines,
+        maxLines = maxLines,
+        textStyle = androidx.compose.ui.text.TextStyle(
+            color = TacticalUi.text,
+            fontFamily = FontFamily.Monospace,
+            fontSize = 12.sp
+        ),
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedBorderColor = TacticalUi.accent,
+            unfocusedBorderColor = TacticalUi.border,
+            focusedTextColor = TacticalUi.text,
+            unfocusedTextColor = TacticalUi.text,
+            focusedContainerColor = TacticalUi.panelTint.copy(alpha = 0.45f),
+            unfocusedContainerColor = TacticalUi.panelTint.copy(alpha = 0.35f)
+        )
+    )
 }
