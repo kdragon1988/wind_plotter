@@ -22,6 +22,7 @@ import com.example.windplotter.viewmodel.MainViewModelFactory
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.os.Build
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.compose.runtime.LaunchedEffect
@@ -33,20 +34,31 @@ import androidx.compose.ui.Alignment
 
 class MainActivity : ComponentActivity() {
     
-    // Permissions required by DJI SDK
-    private val requiredPermissions = arrayOf(
-        Manifest.permission.BLUETOOTH,
-        Manifest.permission.BLUETOOTH_ADMIN,
-        Manifest.permission.VIBRATE,
-        Manifest.permission.INTERNET,
-        Manifest.permission.ACCESS_WIFI_STATE,
-        Manifest.permission.ACCESS_COARSE_LOCATION,
-        Manifest.permission.ACCESS_FINE_LOCATION,
-        Manifest.permission.CHANGE_WIFI_STATE,
-        Manifest.permission.WRITE_EXTERNAL_STORAGE,
-        Manifest.permission.READ_EXTERNAL_STORAGE,
-        Manifest.permission.READ_PHONE_STATE
-    )
+    // Runtime permissions required by DJI SDK (API-level aware)
+    private val requiredPermissions: Array<String>
+        get() {
+            val permissions = mutableListOf(
+                Manifest.permission.ACCESS_COARSE_LOCATION,
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.READ_PHONE_STATE
+            )
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                permissions += Manifest.permission.BLUETOOTH_CONNECT
+                permissions += Manifest.permission.BLUETOOTH_SCAN
+            }
+
+            if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.S_V2) {
+                permissions += Manifest.permission.READ_EXTERNAL_STORAGE
+            }
+
+            @Suppress("DEPRECATION")
+            if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
+                permissions += Manifest.permission.WRITE_EXTERNAL_STORAGE
+            }
+
+            return permissions.toTypedArray()
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -119,6 +131,19 @@ class MainActivity : ComponentActivity() {
                                         navController.navigate("start") {
                                             popUpTo("dashboard") { inclusive = true }
                                         }
+                                    },
+                                    onOpenReport = {
+                                        currentMission?.let { mission ->
+                                            navController.navigate("detail/${mission.missionId}")
+                                        }
+                                    }
+                                )
+                            }
+                            
+                            composable("cockpit") {
+                                com.example.windplotter.ui.screens.CockpitScreen(
+                                    onClose = {
+                                        navController.popBackStack()
                                     }
                                 )
                             }
@@ -141,7 +166,13 @@ class MainActivity : ComponentActivity() {
                                     com.example.windplotter.ui.screens.MissionDetailScreen(
                                         missionId = missionId,
                                         viewModel = viewModel,
-                                        onBack = { navController.popBackStack() }
+                                        onBack = { navController.popBackStack() },
+                                        onResumeMission = { targetMissionId ->
+                                            viewModel.resumeMission(targetMissionId)
+                                            navController.navigate("dashboard") {
+                                                popUpTo("start") { inclusive = true }
+                                            }
+                                        }
                                     )
                                 }
                             }

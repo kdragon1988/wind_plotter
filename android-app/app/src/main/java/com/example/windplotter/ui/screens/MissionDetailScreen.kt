@@ -19,6 +19,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -47,7 +48,8 @@ import java.util.concurrent.TimeUnit
 fun MissionDetailScreen(
     missionId: String,
     viewModel: MainViewModel,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onResumeMission: (String) -> Unit
 ) {
     val stats by viewModel.getMissionStats(missionId).collectAsState(initial = null)
     val samples by viewModel.getMissionSamples(missionId).collectAsState(initial = emptyList())
@@ -102,6 +104,14 @@ fun MissionDetailScreen(
                                 Text(mission.note, style = MaterialTheme.typography.bodyMedium)
                             }
                         }
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Button(
+                        onClick = { onResumeMission(missionId) },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Resume In Operation UI")
                     }
 
                     Spacer(modifier = Modifier.height(16.dp))

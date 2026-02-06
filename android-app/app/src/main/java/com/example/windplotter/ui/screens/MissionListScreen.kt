@@ -158,6 +158,11 @@ fun MissionRow(
                     style = MaterialTheme.typography.bodyMedium,
                     color = Color.Gray
                 )
+                Text(
+                    text = "Sessions: ${mission.sessionCount}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color.Gray
+                )
                 if (!mission.note.isNullOrEmpty()) {
                     Text(
                         text = "Note: ${mission.note}",

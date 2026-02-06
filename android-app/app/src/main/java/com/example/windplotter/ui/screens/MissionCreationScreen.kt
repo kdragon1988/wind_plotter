@@ -140,7 +140,7 @@ fun MissionCreationScreen(
                 enabled = missionName.isNotBlank() && assignee.isNotBlank(),
                 modifier = Modifier.fillMaxWidth().height(64.dp)
             ) {
-                Text("Start Recording", style = MaterialTheme.typography.titleMedium)
+                Text("Open Operation UI", style = MaterialTheme.typography.titleMedium)
             }
 
             Spacer(modifier = Modifier.height(24.dp))

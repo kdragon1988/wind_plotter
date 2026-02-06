@@ -21,6 +21,7 @@ data class Sample(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
     val missionId: String,
+    val sessionIndex: Int = 1,
     val timestamp: Long,
     val seq: Int,
     val latitude: Double,

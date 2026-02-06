@@ -20,7 +20,6 @@ import dji.sdk.keyvalue.key.FlightControllerKey
 import dji.sdk.keyvalue.value.flightcontroller.FlightMode
 import dji.sdk.keyvalue.value.common.LocationCoordinate3D
 import dji.v5.common.callback.CommonCallbacks
-import dji.v5.manager.interfaces.SDKManagerCallback
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -38,6 +37,7 @@ class DataCollectionService : Service() {
     private val database by lazy { AppDatabase.getDatabase(applicationContext) }
     
     private var currentMissionId: String? = null
+    private var currentSessionIndex: Int = 1
     private val sequenceCounter = AtomicInteger(0)
 
     // Data Cache
@@ -54,15 +54,17 @@ class DataCollectionService : Service() {
         const val ACTION_START = "ACTION_START"
         const val ACTION_STOP = "ACTION_STOP"
         const val EXTRA_MISSION_ID = "EXTRA_MISSION_ID"
+        const val EXTRA_SESSION_INDEX = "EXTRA_SESSION_INDEX"
         
         const val CHANNEL_ID = "DataCollectionChannel"
         const val NOTIFICATION_ID = 1001
         private const val TAG = "DataCollectionService"
 
-        fun start(context: Context, missionId: String) {
+        fun start(context: Context, missionId: String, sessionIndex: Int) {
             val intent = Intent(context, DataCollectionService::class.java).apply {
                 action = ACTION_START
                 putExtra(EXTRA_MISSION_ID, missionId)
+                putExtra(EXTRA_SESSION_INDEX, sessionIndex)
             }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 context.startForegroundService(intent)
@@ -85,10 +87,11 @@ class DataCollectionService : Service() {
         when (intent?.action) {
             ACTION_START -> {
                 val missionId = intent.getStringExtra(EXTRA_MISSION_ID)
-                if (missionId != null) {
-                    startCollection(missionId)
+                val sessionIndex = intent.getIntExtra(EXTRA_SESSION_INDEX, 1)
+                if (missionId != null && sessionIndex > 0) {
+                    startCollection(missionId, sessionIndex)
                 } else {
-                    Log.e(TAG, "Mission ID missing")
+                    Log.e(TAG, "Mission ID or session index missing")
                     stopSelf()
                 }
             }
@@ -97,13 +100,13 @@ class DataCollectionService : Service() {
         return START_NOT_STICKY
     }
 
-    private fun startCollection(missionId: String) {
-        Log.d(TAG, "Starting Data Collection Service for Mission: $missionId")
+    private fun startCollection(missionId: String, sessionIndex: Int) {
+        Log.d(TAG, "Starting Data Collection Service for Mission: $missionId / Session: $sessionIndex")
         currentMissionId = missionId
-        sequenceCounter.set(0)
+        currentSessionIndex = sessionIndex
         
         createNotificationChannel()
-        val notification = createNotification(missionId)
+        val notification = createNotification(missionId, sessionIndex)
         startForeground(NOTIFICATION_ID, notification)
 
         initSDKListeners()
@@ -111,6 +114,8 @@ class DataCollectionService : Service() {
         if (collectionJob?.isActive == true) return
 
         collectionJob = serviceScope.launch {
+            val nextSeq = database.sampleDao().getMaxSeq(missionId) + 1
+            sequenceCounter.set(nextSeq.coerceAtLeast(0))
             while (isActive) {
                 collectAndSaveData()
                 delay(1000) // 1Hz sampling
@@ -187,6 +192,7 @@ class DataCollectionService : Service() {
         
         val sample = Sample(
             missionId = missionId,
+            sessionIndex = currentSessionIndex,
             timestamp = System.currentTimeMillis(),
             seq = sequenceCounter.getAndIncrement(),
             latitude = currentLatitude,
@@ -216,10 +222,10 @@ class DataCollectionService : Service() {
         }
     }
 
-    private fun createNotification(missionId: String): Notification {
+    private fun createNotification(missionId: String, sessionIndex: Int): Notification {
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle("WindPlotter")
-            .setContentText("Mission: $missionId - Recording... (Mode: $currentFlightMode)")
+            .setContentText("Mission: $missionId / S$sessionIndex - Measuring... (Mode: $currentFlightMode)")
             .setSmallIcon(android.R.drawable.ic_menu_compass) // Standard icon to avoid resource error
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .build()

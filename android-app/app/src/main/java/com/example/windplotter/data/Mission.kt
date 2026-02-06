@@ -12,5 +12,7 @@ data class Mission(
     val assignee: String,
     val note: String? = null,
     val createdAt: Long = System.currentTimeMillis(),
-    val status: String = "RECORDING" // RECORDING, FINISHED, SYNCED
+    val status: String = "RECORDING", // RECORDING, FINISHED, SYNCED
+    val sessionCount: Int = 0,
+    val lastMeasuredAt: Long? = null
 )

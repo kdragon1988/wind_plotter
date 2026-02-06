@@ -30,22 +30,21 @@ class MainViewModel(
     private val sampleDao: SampleDao
 ) : AndroidViewModel(application) {
 
-    // Current active mission (if any)
     private val _currentMission = MutableStateFlow<Mission?>(null)
     val currentMission: StateFlow<Mission?> = _currentMission.asStateFlow()
 
-    // Status of SDK registration
-    val sdkRegistered = DJIConnectionManager.isRegistered
-    val sdkInitState = DJIConnectionManager.isRegistered
+    private val _isMeasuring = MutableStateFlow(false)
+    val isMeasuring: StateFlow<Boolean> = _isMeasuring.asStateFlow()
 
-    // Live Data observed from DB
+    private val _activeSessionIndex = MutableStateFlow<Int?>(null)
+    val activeSessionIndex: StateFlow<Int?> = _activeSessionIndex.asStateFlow()
+
+    val sdkRegistered = DJIConnectionManager.isRegistered
+    val sdkInitState = DJIConnectionManager.sdkInitState
+
     @OptIn(ExperimentalCoroutinesApi::class)
     val latestSample: StateFlow<Sample?> = _currentMission.flatMapLatest { mission ->
-        if (mission != null) {
-            sampleDao.getLatestSample(mission.missionId)
-        } else {
-            flowOf(null)
-        }
+        if (mission != null) sampleDao.getLatestSample(mission.missionId) else flowOf(null)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
     val currentWindSpeed: StateFlow<Float> = latestSample.map { it?.windSpeed ?: 0f }
@@ -58,34 +57,27 @@ class MainViewModel(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0.0)
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    val sampleCount = _currentMission.flatMapLatest { mission ->
-        if (mission != null) {
-            sampleDao.getSampleCount(mission.missionId)
-        } else {
-            flowOf(0)
-        }
+    val sampleCount: StateFlow<Int> = _currentMission.flatMapLatest { mission ->
+        if (mission != null) sampleDao.getSampleCount(mission.missionId) else flowOf(0)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val recentSamples: StateFlow<List<Sample>> = _currentMission.flatMapLatest { mission ->
-        if (mission != null) {
-            sampleDao.getRecentSamples(mission.missionId)
-        } else {
-            flowOf(emptyList())
-        }
+        if (mission != null) sampleDao.getRecentSamples(mission.missionId) else flowOf(emptyList())
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val missionSamples: StateFlow<List<Sample>> = _currentMission.flatMapLatest { mission ->
+        if (mission != null) sampleDao.getSamplesForMission(mission.missionId) else flowOf(emptyList())
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val sessionIndexes: StateFlow<List<Int>> = _currentMission.flatMapLatest { mission ->
+        if (mission != null) sampleDao.getSessionIndexesForMission(mission.missionId) else flowOf(emptyList())
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     val unsyncedCount: StateFlow<Int> = sampleDao.getUnsyncedCount()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
-
-    @OptIn(ExperimentalCoroutinesApi::class)
-    val missionSamples: StateFlow<List<Sample>> = _currentMission.flatMapLatest { mission ->
-        if (mission != null) {
-            sampleDao.getSamplesForMission(mission.missionId)
-        } else {
-            flowOf(emptyList())
-        }
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     init {
         checkActiveMission()
@@ -93,13 +85,9 @@ class MainViewModel(
 
     private fun checkActiveMission() {
         viewModelScope.launch {
-            val active = missionDao.getActiveMission()
-            _currentMission.value = active
-            // If there is an active mission on startup, restart the service?
-            // Ideally yes, to resume recording if app crashed.
-            if (active != null && active.status == "RECORDING") {
-                DataCollectionService.start(getApplication(), active.missionId)
-            }
+            _currentMission.value = missionDao.getActiveMission()
+            _isMeasuring.value = false
+            _activeSessionIndex.value = null
         }
     }
 
@@ -109,30 +97,67 @@ class MainViewModel(
                 name = name,
                 assignee = assignee,
                 note = note,
-                status = "RECORDING"
+                status = "RECORDING",
+                sessionCount = 0
             )
             missionDao.insert(newMission)
             _currentMission.value = newMission
-            
-            // Start Service
-            DataCollectionService.start(getApplication(), newMission.missionId)
+            _isMeasuring.value = false
+            _activeSessionIndex.value = null
         }
+    }
+
+    fun resumeMission(missionId: String) {
+        viewModelScope.launch {
+            val mission = missionDao.getMissionById(missionId) ?: return@launch
+            val resumed = if (mission.status == "FINISHED") mission.copy(status = "RECORDING") else mission
+            if (resumed != mission) {
+                missionDao.update(resumed)
+            }
+            _currentMission.value = resumed
+            _isMeasuring.value = false
+            _activeSessionIndex.value = null
+        }
+    }
+
+    fun startMeasurement() {
+        viewModelScope.launch {
+            val mission = _currentMission.value ?: return@launch
+            if (_isMeasuring.value) return@launch
+
+            val nextSession = mission.sessionCount + 1
+            val updatedMission = mission.copy(
+                status = "RECORDING",
+                sessionCount = nextSession,
+                lastMeasuredAt = System.currentTimeMillis()
+            )
+            missionDao.update(updatedMission)
+            _currentMission.value = updatedMission
+
+            DataCollectionService.start(getApplication(), updatedMission.missionId, nextSession)
+            _isMeasuring.value = true
+            _activeSessionIndex.value = nextSession
+        }
+    }
+
+    fun stopMeasurement() {
+        if (!_isMeasuring.value) return
+        DataCollectionService.stop(getApplication())
+        _isMeasuring.value = false
+        _activeSessionIndex.value = null
     }
 
     fun stopMission() {
         viewModelScope.launch {
+            stopMeasurement()
             _currentMission.value?.let { mission ->
                 val finishedMission = mission.copy(status = "FINISHED")
                 missionDao.update(finishedMission)
                 _currentMission.value = null
-                
-                // Stop Service
-                DataCollectionService.stop(getApplication())
             }
         }
     }
 
-    // --- Mission History ---
     val allMissions: StateFlow<List<Mission>> = missionDao.getAllMissions()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
@@ -142,7 +167,6 @@ class MainViewModel(
         }
     }
 
-    // --- Statistics ---
     fun getMissionStats(missionId: String): Flow<MissionStats?> {
         return sampleDao.getMissionStats(missionId)
     }
